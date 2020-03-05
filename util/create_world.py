@@ -9,10 +9,10 @@ r_overlook = Room(title="Grand Overlook", description="""A steep cliff appears b
 into the darkness. Ahead to the north, a light flickers in
 the distance, but there is no way across the chasm.""", x=0, y=2)
 r_narrow = Room(title="Narrow Passage", description="""The narrow passage bends here from west
-to north. The smell of gold permeates the air.""", x=1, y=2)
+to north. The smell of gold permeates the air.""", x=1, y=1)
 r_treasure = Room(title="Treasure Chamber", description="""You've found the long-lost treasure
 chamber! Sadly, it has already been completely emptied by
-earlier adventurers. The only exit is to the south.""", x=1, y=3)
+earlier adventurers. The only exit is to the south.""", x=1, y=2)
 r_outside.save()
 r_foyer.save()
 r_overlook.save()
