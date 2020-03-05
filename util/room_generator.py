@@ -67,19 +67,29 @@ class World:
         # While there are rooms to be created...
         previous_room = None
         while room_count < num_rooms:
+            # Randomly choose number of directions
             num_dir = random.randint(0,3)
             dirs = []
-            if num_dir == 0:
-                return
-            if num_dir == 1:
-                dirs.extend(random.randint(-1,2))
-            if num_dir == 2:
-                for i in range(2):
+            # Randomly choose directions to go in
+            while True:
+                # Dead end
+                if num_dir == 0:
+                    break
+                if num_dir == 1:
                     dirs.append(random.randint(-1,2))
-            if num_dir ==3:
-                for i in range(3):
-                    dirs.append(random.randint(-1,2))
+                    break
+                if num_dir == 2:
+                    for i in range(2):
+                        dirs.append(random.randint(-1,2))
+                    break
+                # All 3 might be the same direction or different directions
+                if num_dir ==3:
+                    for i in range(3):
+                        dirs.append(random.randint(-1,2))
+                    break
+            # TODO LOGIC TO PREVENT DIRECTIONING INTO EXISTING ROOM
 
+            # Calculate the direction of the room to be created
             for i in dirs:
                 direction = i
                 # Calculate the direction of the room to be created
@@ -92,38 +102,34 @@ class World:
                 elif direction == 0:
                     room_direction = "s"
                     y -= 1
-                elif direction == 2 and y < size_y -1:
+                elif direction == 2 and y < size_y - 1:
                     # If we hit a wall, turn north and reverse direction
                     room_direction = "n"
                     y += 1
-                    direction ==
+                # Create a room in the given direction
+                room = Room(room_count, "A Generic Room", "This is a generic room.", x, y)
+                # Note that in Django, you'll need to save the room after you create it
+
+                # Save the room in the World grid
+                self.grid[y][x] = room
+
+                # Connect the new room to the previous room
+                if previous_room is not None:
+                    previous_room.connect_rooms(room, room_direction)
+
+                # Update iteration variables
+                previous_room = room
+                room_count += 1
 
 
         # while room count is less than the number of rooms:
         #     create tempvar of random generated "number of directions" of 0,1,2,3  (0 dead end/3 all sides)
         #         loop through each direction
-        #             create tempvar for prospective.direction tot compare the previous.direction
+        #             create tempvar for prospective.direction to compare the previous.direction
         #                 loop to next temp "prospective.direction"
         #             if temp "direction" is reversing the direction into itself (previous.direction)
         #                 create room
         #     after loop ends, random choice one of the directions and break to repeat while loop
-
-            # Create a room in the given direction
-            room = Room(room_count, "A Generic Room", "This is a generic room.", x, y)
-            # Note that in Django, you'll need to save the room after you create it
-
-            # Save the room in the World grid
-            self.grid[y][x] = room
-
-            # Connect the new room to the previous room
-            if previous_room is not None:
-                previous_room.connect_rooms(room, room_direction)
-
-            # Update iteration variables
-            previous_room = room
-            room_count += 1
-
-
 
     def print_rooms(self):
         '''
@@ -181,9 +187,9 @@ class World:
 
 
 w = World()
-num_rooms = 44
-width = 8
-height = 7
+num_rooms = 100
+width = 11
+height = 11
 w.generate_rooms(width, height, num_rooms)
 w.print_rooms()
 
