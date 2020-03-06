@@ -136,7 +136,7 @@ class World:
             # Increment the number of rooms created so far
             self.rooms_created += 1
             return new_room.id
-num_rooms = 500
-width = 50
-height = 50
+num_rooms = 501
+width = 60
+height = 60
 World().generate_rooms(width, height, num_rooms)
