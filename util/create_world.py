@@ -1,9 +1,10 @@
 from django.contrib.auth.models import User
-from adventure.models import Player
+from adventure.models import Player, Room
 import random
 size = ["Tiny", "Small", "Skinny", "Long", "Big", "Huge", "Volumous"]
 adj = ["Fiery", "Cold", "Scary", "Burning", "Broken", "Boring", "Fastidious"]
 movies = ["Airplane!", "Rugrats", "Lord of the Rings", "Jeepers Creepers"]
+print("here is a print")
 room_type = [
     ["Hallway", "It's a hallways - pretty self-explanatory, really."],
     ["Dining Room", "A large table, filled with plates of food. Who was eating here? You want to take a bite..."],
@@ -71,10 +72,16 @@ class World:
         rooms_with_space_nearby = []
         direction_options = ["n","e","s","w"]
         # Create the very first room right in the center as the "seed"
-        self.grid[y][x] = Room(1, "Starting Room", "This is a generic room.", x, y)
+        seed_room = Room(title="Starting Room", description="Enjoy your adventure!", x=x, y=y)
+        seed_room.save()
+        self.grid[y][x] = seed_room
         self.rooms_created = 1
         new_rooms_to_process.append(self.grid[y][x])
         # While there are rooms to be created...
+        players = Player.objects.all()
+        for p in players:
+            p.currentRoom=self.grid[y][x].id
+            p.save()
         while self.rooms_created < num_rooms:
             # If there are new rooms that haven't yet had random branches calculated, get the first from queue
             if len(new_rooms_to_process) > 0:
@@ -137,22 +144,30 @@ class World:
             # Use 1/3 chance to connect that existing adjoining room
             if random.randint(0,2) is 0:
                 # Connect the existing rooms together
-                prev_room.connect_rooms(self.grid[y][x], direction)
+                Room.objects.get(id=prev_room.id).connectRooms(self.grid[y][x], direction)
             return None
         # Create a new room otherwise
         else:
             random_room = random.choice(room_type)
             title_input = f"{random.choice(size)} {random.choice(adj)} {random_room[0]}"
-            new_room = Room(self.rooms_created + 1, title_input, random_room[1], x, y)
+            new_room = Room(title=title_input, description=random_room[1], x=x, y=y)
             # Note that in Django, you'll need to save the room after you create it
             # Save the room in the World grid
             self.grid[y][x] = new_room
             # Connect the room to the previous room
-            prev_room.connect_rooms(new_room, direction)
+            Room.objects.get(id=prev_room.id).connectRooms(new_room, direction)
             # Increment the number of rooms created so far
             self.rooms_created += 1
             new_room.save()
             return new_room
+
+num_rooms = 500
+width = 25
+height = 25
+World().generate_rooms(width, height, num_rooms)
+
+
+
     def print_rooms(self):
         '''
         Print the rooms in room_grid in ascii characters.
@@ -203,16 +218,6 @@ class World:
         # Print string
         print(str)
 
-
-w = World()
-num_rooms = 500
-width = 25
-height = 25
-w.generate_rooms(width, height, num_rooms)
-players=Player.objects.all()
-for p in players:
-    p.currentRoom=1
-    p.save()
 
 # print(f"\n\nWorld\n  height: {height}\n  width: {width},\n  num_rooms: {num_rooms}\n")
 
