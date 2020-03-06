@@ -111,12 +111,15 @@ class World:
         else:
             # abort if new room would be outside of map bounds
             return None
+        reverse_dirs = {"n": "s", "s": "n", "e": "w", "w": "e"}
+        reverse_dir = reverse_dirs[direction]
         # Deal with an existing room at the location
         if (self.grid[y][x] is not None):
             # Use 1/3 chance to connect that existing adjoining room
-            if random.randint(0,2) is 0:
+            if random.randint(0,4) is 0:
                 # Connect the existing rooms together
                 prev_room.connectRooms(Room.objects.get(id=self.grid[y][x]), direction)
+                Room.objects.get(id=self.grid[y][x]).connectRooms(prev_room, reverse_dir)
             return None
         # Create a new room otherwise
         else:
@@ -128,12 +131,12 @@ class World:
             # Save the room in the World grid
             self.grid[y][x] = new_room.id
             # Connect the room to the previous room
-            prev_room.connectRooms(Room.objects.get(id=new_room.id), direction)
+            prev_room.connectRooms(new_room, direction)
+            new_room.connectRooms(prev_room, reverse_dir)
             # Increment the number of rooms created so far
             self.rooms_created += 1
             return new_room.id
-
 num_rooms = 500
-width = 25
-height = 25
+width = 50
+height = 50
 World().generate_rooms(width, height, num_rooms)
